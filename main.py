@@ -77,8 +77,6 @@ def monitor_audio_folder():
                 file_name = file_new_name
 
                 print("Новое имя файла:", file_name)
-            else:
-                print("В имени файла не найдены два подчеркивания '__'")
 
             # Проверяем, является ли файл аудиофайлом
             if file_name.endswith(".amr"):

@@ -4,12 +4,13 @@ import os
 import time
 from telebot import TeleBot #pip install pyTelegramBotAPI
 from telebot import types
+from config import get_token_telegram, get_user_id_telegram
 
 # Инициализация Telegram Bot
-bot = TeleBot("<>")
+bot = TeleBot(get_token_telegram())
 
 # ID пользователя, которому будет отправлен запрос на обработку файла
-user_id = 148918255
+user_id = get_user_id_telegram()
 
 # Функция для отправки запроса пользователю в Telegram Bot
 def send_request(file_name):

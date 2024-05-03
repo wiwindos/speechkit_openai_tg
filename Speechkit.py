@@ -5,10 +5,11 @@
 import requests
 import time
 import json
+from config import get_iam_token_speeechkit
 
 def speech_to_text(filelink):
     # Укажите ваш IAM-токен и ссылку на аудиофайл в Object Storage.
-    key = '<>'
+    key = get_iam_token_speeechkit()
     #filelink = 'https://buket.storage.yandexcloud.net/file'
 
     POST ='https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize'
@@ -48,7 +49,7 @@ def speech_to_text(filelink):
     # Покажите только текст из результатов распознавания.
     text = ""
     for chunk in req['response']['chunks']:
-        text += chunk['alternatives'][0]['text']
+        text += chunk['alternatives'][0]['text'] + " "
 
     # Выводим текст
     print("Text:")

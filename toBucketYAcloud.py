@@ -1,14 +1,15 @@
 import boto3 #pip install boto3
+from config import get_bucket_name_toBucketYAcloud, get_aws_access_key_id, get_aws_secret_access_key
 
 #2заливаем в хранилище яндекс
 
 def toBucket(object_key):
     #object_key = '1234.ogg'
-    bucket_name = '<>'
+    bucket_name = get_bucket_name_toBucketYAcloud()
     os = boto3.client(
         's3',
-        aws_access_key_id = '<>',
-        aws_secret_access_key = '<>',
+        aws_access_key_id = get_aws_access_key_id(),
+        aws_secret_access_key = get_aws_secret_access_key(),
         region_name = 'ru-central1',
         endpoint_url = 'https://storage.yandexcloud.net'
     )
