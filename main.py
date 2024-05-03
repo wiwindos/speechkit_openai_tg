@@ -6,7 +6,7 @@ from telegram_bot import bot, send_request
 from audio_manager import move_to_archive
 from audio_converterOGG import convert_ogg
 from toBucketYAcloud import toBucket
-from Speechkit import speech_to_text
+from speechkit import speech_to_text
 
 folder_path_search = 'audio'
 folder_path_arch = 'archive'
