@@ -7,6 +7,7 @@ from audio_manager import move_to_archive
 from audio_converterOGG import convert_ogg
 from toBucketYAcloud import toBucket
 from speechkit import speech_to_text
+from vsegpt import text_to_chatGPT35_summarize
 
 folder_path_search = 'audio'
 folder_path_arch = 'archive'
@@ -23,14 +24,19 @@ def handle_inline_buttons(call):
         # Если нажата кнопка "Да", обработаем файл
         file_name = call.data.split('_')[1]
         bot.send_message(call.message.chat.id, f"Файл '{file_name}' будет обработан.")
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
         #путь до перемещенного файла
         file_path = os.path.join(folder_path_arch, file_name)
-
+        print(file_name)
         # обработка из звука в текст
         object_url = toBucket(file_name)
         move_to_archive(file_name)
         text = speech_to_text(object_url)
-        bot.send_message(call.message.chat.id, text)
+        #bot.send_message(call.message.chat.id, text)
+
+        text_summarize = text_to_chatGPT35_summarize(text)
+        bot.send_message(call.message.chat.id, text_summarize)
+
 
     elif call.data == "cancel":
         bot.send_message(call.message.chat.id, "Ок, файл не будет обработан.")
@@ -85,6 +91,9 @@ def monitor_audio_folder():
 
                 # Отправляем запрос на обработку файла в Telegram
                 send_request(file_name_ogg)
+
+            elif file_name.endswith(".ogg"):
+                send_request(file_name)
 
         time.sleep(5)  # Проверяем папку каждые 5 секунд
 
