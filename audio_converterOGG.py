@@ -15,3 +15,13 @@ def move_to_archive(file_name: str, folder_path_search: str, folder_path_arch: s
     source_path = os.path.join(folder_path_search, file_name)
     target_path = os.path.join(folder_path_arch, file_name)
     os.rename(source_path, target_path)
+
+def get_audio_duration(filepath: str) -> int:
+    try:
+        probe = ffmpeg.probe(filepath)
+        audio_info = next(stream for stream in probe['streams'] if stream['codec_type'] == 'audio')
+        duration = float(audio_info['duration'])
+        return duration
+    except Exception as e:
+        print("Ошибка при получении информации о длительности аудиофайла:", e)
+        return None

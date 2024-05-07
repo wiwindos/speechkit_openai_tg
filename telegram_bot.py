@@ -13,10 +13,10 @@ bot = TeleBot(get_token_telegram())
 user_id = get_user_id_telegram()
 
 # Функция для отправки запроса пользователю в Telegram Bot
-def send_request(file_name):
+def send_request(file_name: str, audio_file_id_insql: int) -> None:
     # Создаем клавиатуру с inline кнопками "Да" и "Нет"
     keyboard = types.InlineKeyboardMarkup()
-    btn_yes = types.InlineKeyboardButton("Да", callback_data=f"p_{file_name}")
+    btn_yes = types.InlineKeyboardButton("Да", callback_data=f"p_{file_name}_{audio_file_id_insql}")
     btn_no = types.InlineKeyboardButton("Нет", callback_data="cancel")
     keyboard.add(btn_yes, btn_no)
 
