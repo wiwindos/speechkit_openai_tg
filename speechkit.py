@@ -7,7 +7,7 @@ import time
 import json
 from config import get_iam_token_speeechkit
 
-def speech_to_text(filelink):
+def speech_to_text(filelink: str) -> str:
     # Укажите ваш IAM-токен и ссылку на аудиофайл в Object Storage.
     key = get_iam_token_speeechkit()
     #filelink = 'https://buket.storage.yandexcloud.net/file'

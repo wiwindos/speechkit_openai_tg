@@ -16,7 +16,7 @@ user_id = get_user_id_telegram()
 def send_request(file_name):
     # Создаем клавиатуру с inline кнопками "Да" и "Нет"
     keyboard = types.InlineKeyboardMarkup()
-    btn_yes = types.InlineKeyboardButton("Да", callback_data=f"process_{file_name}")
+    btn_yes = types.InlineKeyboardButton("Да", callback_data=f"p_{file_name}")
     btn_no = types.InlineKeyboardButton("Нет", callback_data="cancel")
     keyboard.add(btn_yes, btn_no)
 

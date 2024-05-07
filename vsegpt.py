@@ -1,7 +1,7 @@
 import openai #pip install openai
 from config import get_api_key_vsegpt
 
-def text_to_chatGPT35_summarize(text):
+def text_to_chatGPT35_summarize(text: str) -> str:
 
     openai.api_key = get_api_key_vsegpt()
 
@@ -26,13 +26,3 @@ def text_to_chatGPT35_summarize(text):
     response = response_big.choices[0].message.content
     print("Response:", response)
     return(response)
-
-    """
-    # Имя файла для записи списка файлов
-    output_file = "summarize.txt"
-    
-    # Открываем файл для записи
-    with open(output_file, "a") as f:
-        # Записываем в файл
-        f.write(response + "\n")
-    """

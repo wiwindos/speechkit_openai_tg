@@ -3,8 +3,7 @@ import time
 from datetime import datetime
 from threading import Thread
 from telegram_bot import bot, send_request
-from audio_manager import move_to_archive
-from audio_converterOGG import convert_ogg
+from audio_converterOGG import convert_ogg, move_to_archive
 from toBucketYAcloud import toBucket
 from speechkit import speech_to_text
 from vsegpt import text_to_chatGPT35_summarize
@@ -12,15 +11,16 @@ from vsegpt import text_to_chatGPT35_summarize
 folder_path_search = 'audio'
 folder_path_arch = 'archive'
 
-# Создаем папку "archive", если она еще не создана
-archive_path = 'archive'
-if not os.path.exists(archive_path):
-    os.makedirs(archive_path)
+# Создаем папку "audio\archive", если она еще не создана
+if not os.path.exists(folder_path_search):
+    os.makedirs(folder_path_search)
+if not os.path.exists(folder_path_arch):
+    os.makedirs(folder_path_arch)
 
 # Обработчик нажатия на inline кнопки
 @bot.callback_query_handler(func=lambda call: True)
 def handle_inline_buttons(call):
-    if call.data.startswith('process_'):
+    if call.data.startswith('p_'):
         # Если нажата кнопка "Да", обработаем файл
         file_name = call.data.split('_')[1]
         bot.send_message(call.message.chat.id, f"Файл '{file_name}' будет обработан.")
@@ -29,8 +29,8 @@ def handle_inline_buttons(call):
         file_path = os.path.join(folder_path_arch, file_name)
         print(file_name)
         # обработка из звука в текст
-        object_url = toBucket(file_name)
-        move_to_archive(file_name)
+        object_url = toBucket(file_name, folder_path_search)
+        move_to_archive(file_name, folder_path_search, folder_path_arch)
         text = speech_to_text(object_url)
         #bot.send_message(call.message.chat.id, text)
 
@@ -69,10 +69,10 @@ def monitor_audio_folder():
                 _, extension = os.path.splitext(file_name)
 
                 # Получаем текущее время (часы и минуты)
-                current_time = datetime.now().strftime("%M%S")
+                current_time = datetime.now().strftime("%d%m%Y-%H-%M")
 
                 # Формируем новое имя файла с телефонным номером, текущим временем и расширением
-                file_new_name = f"{last_four_digits}-{current_time}{extension}"
+                file_new_name = f"{phone_number}-{current_time}{extension}"
 
                 # Формируем полный путь к новому файлу
                 new_file_path = os.path.join(folder_path_search, file_new_name)
@@ -87,13 +87,13 @@ def monitor_audio_folder():
             # Проверяем, является ли файл аудиофайлом
             if file_name.endswith(".amr"):
 
-                file_name_ogg = convert_ogg(file_name)
+                file_name_ogg = convert_ogg(file_name, path_for_conversion = folder_path_search)
 
                 # Отправляем запрос на обработку файла в Telegram
                 send_request(file_name_ogg)
 
-            elif file_name.endswith(".ogg"):
-                send_request(file_name)
+            #elif file_name.endswith(".ogg"):
+            #    send_request(file_name)
 
         time.sleep(5)  # Проверяем папку каждые 5 секунд
 

@@ -3,13 +3,15 @@ import os
 
 #1конвертируем amr в ogg
 
-folder_path_search = 'audio'
-folder_path_arch = 'audio'
-
-def convert_ogg(file):
+def convert_ogg(file: str, path_for_conversion: str) -> str:
     file_name, _ = os.path.splitext(file)
-    input_file = f"{folder_path_search}/{file}"
-    output_file = f"{folder_path_arch}/{file_name}.ogg"
+    input_file = f"{path_for_conversion}/{file}"
+    output_file = f"{path_for_conversion}/{file_name}.ogg"
     ffmpeg.input(input_file).output(output_file, codec='libopus', ac=1).run(overwrite_output=True)
     os.remove(input_file)
     return file_name + ".ogg"
+
+def move_to_archive(file_name: str, folder_path_search: str, folder_path_arch: str) -> None:
+    source_path = os.path.join(folder_path_search, file_name)
+    target_path = os.path.join(folder_path_arch, file_name)
+    os.rename(source_path, target_path)
