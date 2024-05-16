@@ -17,7 +17,8 @@ def speech_to_text(filelink: str) -> str:
     body ={
         "config": {
             "specification": {
-                "languageCode": "ru-RU"
+                "languageCode": "ru-RU",
+                "literature_text": "true"
             }
         },
         "audio": {

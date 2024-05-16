@@ -1,5 +1,6 @@
 import os
 import time
+import re
 from datetime import datetime
 from threading import Thread
 from telegram_bot import bot, send_request
@@ -62,15 +63,16 @@ def monitor_audio_folder():
         files = os.listdir(folder_path_search)
 
         # Проверяем каждый файл
-        for file_name in files:
-            # Ищем индекс последнего символа "__" в имени файла
-            last_double_underscore_index = file_name.rfind("__")
+        for file_name_o in files:
+            file_name = file_name_o.replace("-", "")
+            file_name = file_name.replace(" ", "")
 
-            # Если находим "__", извлекаем часть строки после него (телефонный номер)
-            if last_double_underscore_index != -1:
-                phone_number_start = last_double_underscore_index + 2
-                phone_number_end = phone_number_start + 11  # Длина номера телефона 11 символов
-                phone_number = file_name[phone_number_start:phone_number_end]
+            print(file_name)
+            phone_pattern = re.compile(r'(\d{10,})\.amr')
+            match = phone_pattern.search(file_name)
+
+            if match:
+                phone_number = match.group(1)
 
                 # Берем последние 4 цифры из телефонного номера
                 last_four_digits = phone_number[-4:]
@@ -79,7 +81,7 @@ def monitor_audio_folder():
                 _, extension = os.path.splitext(file_name)
 
                 # Получаем текущее время (часы и минуты)
-                current_time_minsec = datetime.now().strftime("%d%m%Y-%H-%M")
+                current_time_minsec = datetime.now().strftime("%d%m%Y-%H-%M-%S")
 
                 # Формируем новое имя файла с телефонным номером, текущим временем и расширением
                 file_new_name = f"{phone_number}-{current_time_minsec}{extension}"
@@ -88,11 +90,14 @@ def monitor_audio_folder():
                 new_file_path = os.path.join(folder_path_search, file_new_name)
 
                 # Переименовываем файл
-                file_path = os.path.join(folder_path_search, file_name)
+                file_path = os.path.join(folder_path_search, file_name_o)
                 os.rename(file_path, new_file_path)
                 file_name = file_new_name
 
                 print("Новое имя файла:", file_name)
+            else:
+                print("номер телефона в названии файла не найден")
+                continue
 
             # Проверяем, является ли файл аудиофайлом
             if file_name.endswith(".amr"):
@@ -112,6 +117,7 @@ def monitor_audio_folder():
 
             #elif file_name.endswith(".ogg"):
             #    send_request(file_name)
+            time.sleep(3)
 
         time.sleep(5)  # Проверяем папку каждые 5 секунд
 
