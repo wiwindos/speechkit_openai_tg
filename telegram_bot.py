@@ -6,7 +6,7 @@ from telebot import TeleBot #pip install pyTelegramBotAPI
 from telebot import types
 from config import get_token_telegram, get_user_id_telegram
 from call_transcript import get_text_by_audioFileId
-from test_rest_api_planfix import text_to_planfix_comment_task
+from rest_api_planfix import text_to_planfix_comment_task
 
 # Инициализация Telegram Bot
 bot = TeleBot(get_token_telegram())
