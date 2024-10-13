@@ -3,7 +3,7 @@ import json
 
 def text_to_planfix_comment_task(text_from_TextData, task_id):
     # Ваш токен авторизации
-    TOKEN = '65d5b3136c990b1f8e9f32311e78fd0b'
+    TOKEN = ''
 
     # URL API для добавления комментария к задаче с ID 114
     url = f'https://zevtek.planfix.ru/rest/task/{task_id}/comments/'
