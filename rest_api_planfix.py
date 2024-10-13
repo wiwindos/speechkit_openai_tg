@@ -1,14 +1,12 @@
 import requests
 import json
-from config import get_api_key_planfix, get_url_planfix
 
 def text_to_planfix_comment_task(text_from_TextData, task_id):
     # Ваш токен авторизации
-    TOKEN = get_api_key_planfix()
+    TOKEN = '65d5b3136c990b1f8e9f32311e78fd0b'
 
     # URL API для добавления комментария к задаче с ID 114
-    myUrl = get_url_planfix()
-    url = f'{myUrl}/{task_id}/comments/'
+    url = f'https://zevtek.planfix.ru/rest/task/{task_id}/comments/'
 
     # Заголовки для запроса
     headers = {
