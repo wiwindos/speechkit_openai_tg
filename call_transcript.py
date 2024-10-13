@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Optional
 
 def add_data_to_audio_files(phone_number: str, upload_date: str, duration: float, filepath: str) -> int:
     conn = sqlite3.connect('call_transcript.db')
@@ -40,6 +41,7 @@ def get_all_text_data_files() -> str:
     data = c.fetchall()
     conn.close()
     return data
+
 def get_all_analysis_result_files() -> str:
     conn = sqlite3.connect('call_transcript.db')
     c = conn.cursor()
@@ -47,6 +49,27 @@ def get_all_analysis_result_files() -> str:
     data = c.fetchall()
     conn.close()
     return data
+
+def get_text_by_audioFileId(audio_file_id:int) -> Optional[str]:
+    try:
+        conn = sqlite3.connect('call_transcript.db')
+        c = conn.cursor()
+        c.execute("SELECT text FROM TextData WHERE audio_file_id = ?", (audio_file_id,))
+        data = c.fetchone()
+
+        if data:
+            return data[0]  # Возвращаем значение text
+        else:
+            return None  # Если значение не найдено
+
+    except sqlite3.Error as e:
+        print(f"Ошибка при работе с SQLite: {e}")
+        return None
+
+    finally:
+    # Закрываем соединение с базой данных
+        if conn:
+            conn.close()
 
 
 # text_data_files = get_all_text_data_files()

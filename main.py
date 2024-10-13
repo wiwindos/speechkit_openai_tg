@@ -3,7 +3,7 @@ import time
 import re
 from datetime import datetime
 from threading import Thread
-from telegram_bot import bot, send_request
+from telegram_bot import bot, send_request, send_Task_komment_Planfix, send_request_idTaskPlanfix
 from audio_converterOGG import convert_ogg, move_to_archive, get_audio_duration
 from toBucketYAcloud import toBucket
 from speechkit import speech_to_text
@@ -49,13 +49,20 @@ def handle_inline_buttons(call):
         # занесение в бд AnalysisResults
         add_analysis_result(text_data_file_id, text_summarize, current_time_date)
 
-        bot.send_message(call.message.chat.id, text_summarize)
+        #bot.send_message(call.message.chat.id, text_summarize)
+        send_Task_komment_Planfix(text_summarize, audio_file_id_insql)
 
     elif call.data == "cancel":
         bot.send_message(call.message.chat.id, "Ок, файл не будет обработан.")
         # Добавьте здесь необходимую логику для обработки нажатия кнопки "Нет"
         # Удаляем кнопку "Да" после нажатия
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+
+    elif call.data.startswith('sp_'):
+        # Если нажата кнопка "Выслать в PF", запрос у пользователя ID Task Planfix
+        audio_file_id_insql = call.data.split('_')[1]
+        bot.send_message(call.message.chat.id, "Пожалуйста, введите ID задачи Planfix:" + f"Через _ введите '{audio_file_id_insql}'")
+        bot.register_next_step_handler(call.message, send_request_idTaskPlanfix)
 
 # Функция мониторинга папки audio
 def monitor_audio_folder():
