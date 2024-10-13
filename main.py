@@ -43,7 +43,8 @@ def handle_inline_buttons(call):
         current_time_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         text_data_file_id = add_text_data(text, audio_file_id_insql, current_time_date)
 
-        text_summarize = text_to_chatGPT35_summarize(text)
+        #text_summarize = text_to_chatGPT35_summarize(text)
+        text_summarize = "NONE"
 
         # занесение в бд AnalysisResults
         add_analysis_result(text_data_file_id, text_summarize, current_time_date)
@@ -67,9 +68,11 @@ def monitor_audio_folder():
             file_name = file_name_o.replace("-", "")
             file_name = file_name.replace(" ", "")
 
-            print(file_name)
+            #print(file_name)
             phone_pattern = re.compile(r'(\d{10,})\.amr')
             match = phone_pattern.search(file_name)
+
+
 
             if match:
                 phone_number = match.group(1)
@@ -96,8 +99,12 @@ def monitor_audio_folder():
 
                 print("Новое имя файла:", file_name)
             else:
-                print("номер телефона в названии файла не найден")
-                continue
+                if file_name.endswith(".ogg"):
+                    #print("в папке только файлы с расширением .ogg")
+                    continue
+                else:
+                    #print("номер телефона в названии файла не найден")
+                    continue
 
             # Проверяем, является ли файл аудиофайлом
             if file_name.endswith(".amr"):
@@ -110,13 +117,12 @@ def monitor_audio_folder():
                 current_time_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
                 # занесение в бд AudioFiles
-                audio_file_id_insql = add_data_to_audio_files(phone_number, current_time_date, duration, f'{folder_path_search}/{file_name_ogg}')
+                audio_file_id_insql = add_data_to_audio_files(phone_number, current_time_date, duration,
+                                                              f'{folder_path_search}/{file_name_ogg}')
 
                 # Отправляем запрос на обработку файла в Telegram
                 send_request(file_name_ogg, audio_file_id_insql)
 
-            #elif file_name.endswith(".ogg"):
-            #    send_request(file_name)
             time.sleep(3)
 
         time.sleep(5)  # Проверяем папку каждые 5 секунд

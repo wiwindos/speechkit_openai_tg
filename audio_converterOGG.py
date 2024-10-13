@@ -18,6 +18,7 @@ def move_to_archive(file_name: str, folder_path_search: str, folder_path_arch: s
 
 def get_audio_duration(filepath: str) -> int:
     try:
+        print("Путь к файлу:", filepath)
         probe = ffmpeg.probe(filepath)
         audio_info = next(stream for stream in probe['streams'] if stream['codec_type'] == 'audio')
         duration = float(audio_info['duration'])
