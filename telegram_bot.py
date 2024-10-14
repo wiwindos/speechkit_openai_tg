@@ -52,6 +52,26 @@ def send_request_idTaskPlanfix(message) -> int:
                          "Пожалуйста, введите корректный ID задачи (тип integer). Попробуйте еще раз.")
         bot.register_next_step_handler(message, send_request_idTaskPlanfix)
 
+def split_message_by_words(text, max_length=4096):
+    # Разделяем текст на слова
+    words = text.split(' ')
+    messages = []
+    current_message = ""
+
+    for word in words:
+        # Если текущее слово помещается в сообщение, добавляем его
+        if len(current_message) + len(word) + 1 <= max_length:
+            current_message += word + ' '
+        else:
+            # Если сообщение достигает лимита, отправляем его
+            messages.append(current_message.strip())
+            current_message = word + ' '
+
+    # Добавляем последнее сообщение, если оно не пустое
+    if current_message:
+        messages.append(current_message.strip())
+
+    return messages
 
 # Обработчик команды /start и /help
 @bot.message_handler(commands=["start", "help"])

@@ -3,7 +3,7 @@ import time
 import re
 from datetime import datetime
 from threading import Thread
-from telegram_bot import bot, send_request, send_Task_komment_Planfix, send_request_idTaskPlanfix
+from telegram_bot import bot, send_request, send_Task_komment_Planfix, send_request_idTaskPlanfix, split_message_by_words
 from audio_converterOGG import convert_ogg, move_to_archive, get_audio_duration
 from toBucketYAcloud import toBucket
 from speechkit import speech_to_text
@@ -38,7 +38,12 @@ def handle_inline_buttons(call):
         object_url = toBucket(file_name, folder_path_search)
         move_to_archive(file_name, folder_path_search, folder_path_arch)
         text = speech_to_text(object_url)
-        bot.send_message(call.message.chat.id, text + "       ")
+
+        messages = split_message_by_words(text)
+        for message in messages:
+            text = text + " " + message
+            bot.send_message(call.message.chat.id, message)
+        #bot.send_message(call.message.chat.id, text + "       ")
 
         #занесение в бд TextData
         current_time_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -57,7 +62,6 @@ def handle_inline_buttons(call):
 
     elif call.data == "cancel":
         bot.send_message(call.message.chat.id, "Ок, файл не будет обработан.")
-        # Добавьте здесь необходимую логику для обработки нажатия кнопки "Нет"
         # Удаляем кнопку "Да" после нажатия
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
