@@ -71,6 +71,27 @@ def get_text_by_audioFileId(audio_file_id:int) -> Optional[str]:
         if conn:
             conn.close()
 
+def get_analysis_result_by_AnalysisResults(text_data_file_id:int) -> Optional[str]:
+    try:
+        conn = sqlite3.connect('call_transcript.db')
+        c = conn.cursor()
+        c.execute("SELECT analysis_result FROM AnalysisResults WHERE text_data_id = ?", (text_data_file_id,))
+        data = c.fetchone()
+
+        if data:
+            return data[0]  # Возвращаем значение text
+        else:
+            return None  # Если значение не найдено
+
+    except sqlite3.Error as e:
+        print(f"Ошибка при работе с SQLite: {e}")
+        return None
+
+    finally:
+    # Закрываем соединение с базой данных
+        if conn:
+            conn.close()
+
 
 # text_data_files = get_all_text_data_files()
 # print(text_data_files)

@@ -1,6 +1,7 @@
 import requests
 import json
 from config import get_api_key_planfix, get_url_planfix
+from datetime import datetime, timedelta
 
 def text_to_planfix_comment_task(text_from_TextData, task_id):
     # Ваш токен авторизации
@@ -17,18 +18,19 @@ def text_to_planfix_comment_task(text_from_TextData, task_id):
     }
 
     # Данные для отправки в запросе
+    current_time_utc_plus_5 = datetime.utcnow()
     data = {
         "sourceId": "e0c5f3c1-947f-4f29-baa3-d0f7c0b42b47",  # Случайный sourceId
         "sourceObjectId": "c7d1b638-12f5-41f1-b55f-45a28c5efb11",  # Случайный sourceObjectId
         "sourceDataVersion": "AADJIgAAAAA=",
         "dateTime": {
-            "date": "12-06-2022",  # Дата комментария
-            "time": "12:15",  # Время комментария
-            "datetime": "2022-06-12T12:15Z"  # Полная метка времени в формате ISO
+            "date": current_time_utc_plus_5.strftime("%d-%m-%Y"),  # Дата комментария
+            "time": current_time_utc_plus_5.strftime("%H:%M"),  # Время комментария
+            "datetime": current_time_utc_plus_5.strftime("%Y-%m-%dT%H:%MZ")  # Полная метка времени в формате ISO
         },
         "description": f"{text_from_TextData}",  # Текст комментария
         "owner": {
-            "id": "contact:1"  # Установлено на 1
+            "id": "1"  # Установлено на 1
         },
         "isPinned": False,  # Не закреплять комментарий
         "isHidden": False,  # Не скрывать комментарий
@@ -38,7 +40,9 @@ def text_to_planfix_comment_task(text_from_TextData, task_id):
                     "id": "user:1"  # ID пользователя
                 }
             ],
-            "roles": []  # Роли (пустой список)
+            "roles": [
+                "admin"
+            ]  # Роли (пустой список)
         }
     }
 

@@ -9,6 +9,7 @@ from toBucketYAcloud import toBucket
 from speechkit import speech_to_text
 from vsegpt import text_to_chatGPT35_summarize
 from call_transcript import add_data_to_audio_files, add_text_data, add_analysis_result
+from yandexGPTtest import text_to_yandexGPT_summarize
 
 folder_path_search = 'audio'
 folder_path_arch = 'archive'
@@ -44,13 +45,15 @@ def handle_inline_buttons(call):
         text_data_file_id = add_text_data(text, audio_file_id_insql, current_time_date)
 
         #text_summarize = text_to_chatGPT35_summarize(text)
-        text_summarize = "NONE"
+        text_summarize = text_to_yandexGPT_summarize(text)
+
+        #text_summarize = "NONE"
 
         # занесение в бд AnalysisResults
         add_analysis_result(text_data_file_id, text_summarize, current_time_date)
 
         #bot.send_message(call.message.chat.id, text_summarize)
-        send_Task_komment_Planfix(text_summarize, audio_file_id_insql)
+        send_Task_komment_Planfix(text_summarize, text_data_file_id)
 
     elif call.data == "cancel":
         bot.send_message(call.message.chat.id, "Ок, файл не будет обработан.")
@@ -60,8 +63,8 @@ def handle_inline_buttons(call):
 
     elif call.data.startswith('sp_'):
         # Если нажата кнопка "Выслать в PF", запрос у пользователя ID Task Planfix
-        audio_file_id_insql = call.data.split('_')[1]
-        bot.send_message(call.message.chat.id, "Пожалуйста, введите ID задачи Planfix:" + f"Через _ введите '{audio_file_id_insql}'")
+        text_data_file_id = call.data.split('_')[1]
+        bot.send_message(call.message.chat.id, "Пожалуйста, введите ID задачи Planfix:" + f"Через _ введите '{text_data_file_id}'")
         bot.register_next_step_handler(call.message, send_request_idTaskPlanfix)
 
 # Функция мониторинга папки audio

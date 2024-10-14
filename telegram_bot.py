@@ -5,7 +5,7 @@ import time
 from telebot import TeleBot #pip install pyTelegramBotAPI
 from telebot import types
 from config import get_token_telegram, get_user_id_telegram
-from call_transcript import get_text_by_audioFileId
+from call_transcript import get_analysis_result_by_AnalysisResults
 from rest_api_planfix import text_to_planfix_comment_task
 
 # Инициализация Telegram Bot
@@ -39,13 +39,13 @@ def send_request_idTaskPlanfix(message) -> int:
         task_id = int(task_id_str)  # Преобразуем ввод в integer
         #id_connect(task_id)  # Вызов вашей функции с ID задачи
 
-        text_from_TextData = get_text_by_audioFileId(audio_file_id)
-        if text_from_TextData == None:
+        analysis_from_AnalysisResult = get_analysis_result_by_AnalysisResults(audio_file_id)
+        if analysis_from_AnalysisResult == None:
             bot.send_message(message.chat.id, "Попробуйте еще раз")
             bot.register_next_step_handler(message, send_request_idTaskPlanfix)
         else:
-            bot.send_message(message.chat.id, "ID задачи успешно получен.")
-            text_to_planfix_comment_task(text_from_TextData, task_id)
+            bot.send_message(message.chat.id, "ID задачи успешно получен. И сообщение отправлено в Planfix")
+            text_to_planfix_comment_task(analysis_from_AnalysisResult, task_id)
 
     except ValueError:
         bot.send_message(message.chat.id,
