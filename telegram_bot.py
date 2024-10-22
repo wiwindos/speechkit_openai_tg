@@ -19,7 +19,7 @@ def send_request(file_name: str, audio_file_id_insql: int) -> None:
     # Создаем клавиатуру с inline кнопками "Да" и "Нет"
     keyboard = types.InlineKeyboardMarkup()
     btn_yes = types.InlineKeyboardButton("Да", callback_data=f"p_{file_name}_{audio_file_id_insql}")
-    btn_no = types.InlineKeyboardButton("Нет", callback_data="cancel")
+    btn_no = types.InlineKeyboardButton("Нет", callback_data=f"cancel_{file_name}")
     keyboard.add(btn_yes, btn_no)
 
     bot.send_message(user_id, f"Хотите обработать файл '{file_name}'?", reply_markup=keyboard)

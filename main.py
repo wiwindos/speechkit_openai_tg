@@ -1,18 +1,20 @@
 import os
 import time
 import re
-from datetime import datetime
+import shutil
+from datetime import datetime, timedelta
 from threading import Thread
 from telegram_bot import bot, send_request, send_Task_komment_Planfix, send_request_idTaskPlanfix, split_message_by_words
 from audio_converterOGG import convert_ogg, move_to_archive, get_audio_duration
 from toBucketYAcloud import toBucket
 from speechkit import speech_to_text
-from vsegpt import text_to_chatGPT35_summarize
+#from vsegpt import text_to_chatGPT35_summarize
 from call_transcript import add_data_to_audio_files, add_text_data, add_analysis_result
 from yandexGPTtest import text_to_yandexGPT_summarize
 
 folder_path_search = 'audio'
 folder_path_arch = 'archive'
+auth_file_path = "authorized_key.json"
 
 # Создаем папку "audio\archive", если она еще не создана
 if not os.path.exists(folder_path_search):
@@ -27,11 +29,18 @@ def handle_inline_buttons(call):
         # Если нажата кнопка "Да", обработаем файл
         file_name = call.data.split('_')[1]
         audio_file_id_insql = call.data.split('_')[2]
-        bot.send_message(call.message.chat.id, f"Файл '{file_name}' будет обработан.")
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
-        #путь до перемещенного файла
-        file_path = os.path.join(folder_path_arch, file_name)
+        file_path = os.path.join(folder_path_search, file_name)
+
+        # Проверка на существование файла
+        if os.path.exists(file_path):
+            bot.send_message(call.message.chat.id, f"Файл '{file_name}' будет обработан.")
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+        else:
+            bot.send_message(call.message.chat.id, f"Файл '{file_name}' не найден.")
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            return
+
         print(file_name)
 
         # обработка из звука в текст
@@ -50,8 +59,8 @@ def handle_inline_buttons(call):
         text_data_file_id = add_text_data(text, audio_file_id_insql, current_time_date)
 
         #text_summarize = text_to_chatGPT35_summarize(text)
-        text_summarize = text_to_yandexGPT_summarize(text)
-
+        #text_summarize = text_to_yandexGPT_summarize(text)
+        text_summarize = text_to_yandexGPT_summarize(text, auth_file_path)
         #text_summarize = "NONE"
 
         # занесение в бд AnalysisResults
@@ -60,10 +69,11 @@ def handle_inline_buttons(call):
         #bot.send_message(call.message.chat.id, text_summarize)
         send_Task_komment_Planfix(text_summarize, text_data_file_id)
 
-    elif call.data == "cancel":
-        bot.send_message(call.message.chat.id, "Ок, файл не будет обработан.")
-        # Удаляем кнопку "Да" после нажатия
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+    elif call.data.startswith('cancel_'):
+        file_name = call.data.split('_')[1]
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text=f"Ок, файл {file_name} не будет обработан.")
 
     elif call.data.startswith('sp_'):
         # Если нажата кнопка "Выслать в PF", запрос у пользователя ID Task Planfix
@@ -115,6 +125,18 @@ def monitor_audio_folder():
             else:
                 if file_name.endswith(".ogg"):
                     #print("в папке только файлы с расширением .ogg")
+                    file_path = os.path.join(folder_path_search, file_name_o)
+                    creation_time = os.path.getctime(file_path)  # Время создания файла
+                    creation_time = datetime.fromtimestamp(creation_time)
+
+                    # Проверяем, прошло ли 5 дней с момента создания файла
+                    if creation_time <= datetime.now() - timedelta(days=5):
+                        # Перенос файла в папку "not processed"
+                        destination_folder = os.path.join(folder_path_search, 'not processed')
+                        if not os.path.exists(destination_folder):
+                            os.makedirs(destination_folder)  # Создать папку, если ее нет
+                        shutil.move(file_path, os.path.join(destination_folder, file_name_o))
+
                     continue
                 else:
                     #print("номер телефона в названии файла не найден")
@@ -125,6 +147,15 @@ def monitor_audio_folder():
                 duration = get_audio_duration(f'{folder_path_search}/{file_name}')
                 if duration is None:
                     print("Что то случилось на этапе определения длительности, код приостановлен")
+                    continue
+
+                if duration < 5:
+                    # Перемещение файла в папку "archive" если длительность меньше 5 секунд
+                    if not os.path.exists(folder_path_arch):
+                        os.makedirs(folder_path_arch)  # Создаем папку, если её нет
+                    shutil.move(f'{folder_path_search}/{file_name}', os.path.join(folder_path_arch, file_name))
+
+                    print(f"Файл '{file_name}' менее 5с, перенесен в папку 'archive'.")
                     continue
 
                 file_name_ogg = convert_ogg(file_name, path_for_conversion=folder_path_search)
